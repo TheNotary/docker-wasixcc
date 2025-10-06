@@ -42,6 +42,18 @@ RUN wasixcc --download-all
 
 ENV PATH="/deps/binaryen/out/bin:${PATH}"
 
+ENV OPENSSL_LIB_DIR="/usr/lib/x86_64-linux-gnu"
+ENV OPENSSL_INCLUDE_DIR="/usr/include/openssl"
+ENV OPENSSL_LINK="/usr/include/openssl"
+ENV OPENSSL_LIBSSL="/usr/lib/x86_64-linux-gnu"
+
+ENV CC=wasixcc
+ENV CXX=wasix++
+ENV LD=wasixld
+ENV AR=wasixar
+ENV NM=wasixnm
+ENV RANLIB=wasixranlib
+
 
 # When done developing this dockerfile, make sure you clean up
 # the apt-get junk for production

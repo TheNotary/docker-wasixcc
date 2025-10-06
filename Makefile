@@ -1,5 +1,6 @@
 DOCKER_IMAGE_NAME = wasixcc
 DTR_DOMAIN = quay.io
+USER = thenotary
 
 build:
 	docker build -t ${USER}/${DOCKER_IMAGE_NAME} .

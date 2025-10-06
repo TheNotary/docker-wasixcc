@@ -8,4 +8,9 @@ if [ "$1" = 'bash' ]; then
 fi
 
 cd /app
-make
+if [ -z "$1" ]; then
+  make
+else
+  echo "Running '${@:1}'"
+  ${@:1}
+fi
