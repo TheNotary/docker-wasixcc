@@ -30,7 +30,3 @@ To test the container do:
 
     $ make console
 
-To run the container do:
-
-    $ make run
-
