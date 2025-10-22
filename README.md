@@ -1,6 +1,6 @@
 # Wasix CC
 
-This is a linux tool for compiling C into web assembly.  See [here](https://github.com/wasix-org/wasixcc)
+This is a linux tool for compiling C into web assembly.  See [wasixcc](https://github.com/wasix-org/wasixcc) for details.  Also I tagged on [clang](https://developer.fermyon.com/wasm-languages/c-lang) that can build wasms via [wasi-sdk](https://github.com/WebAssembly/wasi-sdk). 
 
 
 ## Example Usage
@@ -29,4 +29,5 @@ To build the docker container do:
 To test the container do:
 
     $ make console
+
 
