@@ -4,9 +4,15 @@ FROM debian:bookworm
 #  System Deps #
 ################
 
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
-  apt-get install -y git cmake build-essential ninja-build
+  apt-get install -y git cmake build-essential ninja-build clang \
+                     ca-certificates curl gnupg lsb-release \
+                     pkg-config libssl-dev wget software-properties-common libpcre3-dev libz-dev autoconf gcc-multilib \
+                     vim \
+  && rm -rf /var/lib/apt/lists/*
+
 
 
 WORKDIR /deps
@@ -16,21 +22,11 @@ RUN git submodule init
 RUN git submodule update
 RUN mkdir -p out
 
-RUN apt-get install -y clang
-
 RUN cmake -S . -B out -G Ninja -DCMAKE_INSTALL_PREFIX=out/install -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DBUILD_FUZZTEST=ON
-
-RUN apt-get update && \
-  apt-get install -y vim
 
 RUN cmake --build out --config Release -v
 
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get install -y ca-certificates curl gnupg lsb-release
-
 RUN curl  --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
-RUN apt-get install -y pkg-config libssl-dev wget software-properties-common
 
 RUN wget -qO- https://apt.llvm.org/llvm.sh | bash -s -- 21
 
@@ -40,6 +36,31 @@ RUN cargo install wasixcc -F bin
 RUN wasixcc --install-executables /usr/local/bin
 RUN wasixcc --download-all
 
+# Install https://github.com/WebAssembly/wasi-sdk
+WORKDIR /wasi-bin
+
+ENV WASI_OS=linux
+ENV WASI_ARCH=x86_64
+ENV WASI_VERSION=27
+ENV WASI_VERSION_FULL=${WASI_VERSION}.0
+RUN wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_VERSION}/wasi-sdk-${WASI_VERSION_FULL}-${WASI_ARCH}-${WASI_OS}.tar.gz
+RUN tar xvf wasi-sdk-${WASI_VERSION_FULL}-${WASI_ARCH}-${WASI_OS}.tar.gz
+
+ENV WASI_SDK_PATH=/wasi-bin/wasi-sdk-${WASI_VERSION_FULL}-${WASI_ARCH}-${WASI_OS}
+
+ENV CLANGCC="${WASI_SDK_PATH}/bin/clang --sysroot=${WASI_SDK_PATH}/share/wasi-sysroot"
+
+# /wasi-bin/wasi-sdk-27.0-x86_64-linux/bin/clang --sysroot=/wasi-bin/wasi-sdk-27.0-x86_64-linux/share/wasi-sysroot
+
+
+
+
+#RUN apt-get install -y lld-14 wabt libc-dev llvm-14
+
+#RUN wget -qO- https://apt.llvm.org/llvm.sh | bash -s -- 14
+
+
+ENV LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:${LIBRARY_PATH}"
 ENV PATH="/deps/binaryen/out/bin:${PATH}"
 
 ENV OPENSSL_LIB_DIR="/usr/lib/x86_64-linux-gnu"
