@@ -44,15 +44,12 @@ ENV WASI_ARCH=x86_64
 ENV WASI_VERSION=27
 ENV WASI_VERSION_FULL=${WASI_VERSION}.0
 RUN wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_VERSION}/wasi-sdk-${WASI_VERSION_FULL}-${WASI_ARCH}-${WASI_OS}.tar.gz
-RUN tar xvf wasi-sdk-${WASI_VERSION_FULL}-${WASI_ARCH}-${WASI_OS}.tar.gz
+RUN tar xvf wasi-sdk-${WASI_VERSION_FULL}-${WASI_ARCH}-${WASI_OS}.tar.gz --strip-components=1
 
-ENV WASI_SDK_PATH=/wasi-bin/wasi-sdk-${WASI_VERSION_FULL}-${WASI_ARCH}-${WASI_OS}
-
+ENV WASI_SDK_PATH=/wasi-bin
 ENV CLANGCC="${WASI_SDK_PATH}/bin/clang --sysroot=${WASI_SDK_PATH}/share/wasi-sysroot"
 
-# /wasi-bin/wasi-sdk-27.0-x86_64-linux/bin/clang --sysroot=/wasi-bin/wasi-sdk-27.0-x86_64-linux/share/wasi-sysroot
-
-
+# /wasi-bin/bin/clang --sysroot=/wasi-bin/share/wasi-sysroot
 
 
 #RUN apt-get install -y lld-14 wabt libc-dev llvm-14
