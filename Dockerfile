@@ -14,6 +14,12 @@ RUN apt-get update && \
   && rm -rf /var/lib/apt/lists/*
 
 
+#######################################################
+# Install https://github.com/WebAssembly/binaryen.git #
+#######################################################
+#
+# This gives you a bunch of wasm related tools
+#
 
 WORKDIR /deps
 RUN git clone https://github.com/WebAssembly/binaryen.git
@@ -36,7 +42,14 @@ RUN cargo install wasixcc -F bin
 RUN wasixcc --install-executables /usr/local/bin
 RUN wasixcc --download-all
 
-# Install https://github.com/WebAssembly/wasi-sdk
+###################################################
+# Install https://github.com/WebAssembly/wasi-sdk #
+###################################################
+#
+# This gives you a clang and other misc bins in /wasi-bin with wasm support.
+# It gives you a sysroot, but it might be too weak?
+#
+
 WORKDIR /wasi-bin
 
 ENV WASI_OS=linux
@@ -53,12 +66,37 @@ ENV CLANGCC="${WASI_SDK_PATH}/bin/clang --sysroot=${WASI_SDK_PATH}/share/wasi-sy
 
 
 #RUN apt-get install -y lld-14 wabt libc-dev llvm-14
+#RUN apt-get install -y lld-14 wabt libc-dev llvm-14
+RUN apt-get install -y apt-file
+RUN apt-file update
+
+RUN apt-get install -y bash-builtins
 
 #RUN wget -qO- https://apt.llvm.org/llvm.sh | bash -s -- 14
+
+####################################################
+# Install https://github.com/WebAssembly/wasi-libc #
+####################################################
+#
+# This gives you a sysroot that clang can use which gives you a ton of headers
+# and the ability to build for the wasm target.
+#
+# I think we want wasmer's fork though?
+#
+
+WORKDIR /wasi-libc
+RUN git clone https://github.com/WebAssembly/wasi-libc
+WORKDIR /wasi-libc/wasi-libc
+RUN make \
+     CC=/wasi-bin/bin/clang \
+     AR=/wasi-bin/bin/llvm-ar \
+     NM=/wasi-bin/bin/llvm-nm
+
 
 
 ENV LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:${LIBRARY_PATH}"
 ENV PATH="/deps/binaryen/out/bin:${PATH}"
+ENV PATH="/wasi-bin/bin:${PATH}"
 
 ENV OPENSSL_LIB_DIR="/usr/lib/x86_64-linux-gnu"
 ENV OPENSSL_INCLUDE_DIR="/usr/include/openssl"
